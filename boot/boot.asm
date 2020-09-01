@@ -8,5 +8,5 @@ int 0x10
 jmp $
 
 ; allocate space for padding and the boot number
-time 510-($-$$) db 0
+times 510-($-$$) db 0
 dw 0xaa55
