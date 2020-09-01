@@ -1,12 +1,36 @@
 ;; simple bootloader, will be updated
 
-; very dumb, only prints X to the screen
-mov ah, 0x0e
-mov al, 'X'
-int 0x10
+global loader
+extern kernelmain
+MODULEALIGN equ 1<<0
+MEMINFO equ 1<<1
+FLAGS equ MODULEALIGN | MEMINFO
+MNUM equ 0x1BADB002
+CHECKSUN equ -(MNUM + FLAGS)
 
-jmp $
+section .text
+align 4
+multiBootHeader:
+dd MNUM
+dd FLAGS
+dd CHECKSUM
 
-; allocate space for padding and the boot number
-times 510-($-$$) db 0
-dw 0xaa55
+STACKSIZE equ 0x400
+
+loader:
+mov esp, stack+STACKSIZE
+push eax
+push ebx
+
+call kernelmain
+
+cli
+
+hang:
+hlt
+jmp hang
+
+section .bss
+align 4
+stack:
+resb STACKSIZE
